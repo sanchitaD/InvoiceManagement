@@ -9,5 +9,9 @@ class InvoiceManagementApplicationTests {
 	@Test
 	void contextLoads() {
 	}
+	@Test
+	void testGenerateInvoice(){
+
+	}
 
 }
