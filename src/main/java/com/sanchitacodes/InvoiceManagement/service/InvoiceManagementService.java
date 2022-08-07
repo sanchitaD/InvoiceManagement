@@ -38,7 +38,6 @@ public class InvoiceManagementService {
 
     public TransactionDetail updateTransactionDetail(TransactionDetail transactionDetail, int id) {
         log.info("Inside updateTransactionDetail of InvoiceManagementService, updating records!");
-        //TODO: update with id
         return transactionManagementRepository.save(transactionDetail);
     }
 
@@ -60,8 +59,7 @@ public class InvoiceManagementService {
     private ClientDetail getClientDetail(String clientName) {
         log.info("Inside getClientDetail of InvoiceManagementService, gettingClientDetails from DB!");
         ClientManagementServiceImpl clientManagementServiceImpl = new ClientManagementServiceImpl();
-        ClientDetail clientDetail = clientManagementServiceImpl.fetchClientDetailByClientName(clientName);
-        return clientDetail;
+        return clientManagementServiceImpl.fetchClientDetailByClientName(clientName);
     }
 
     private void saveInvoiceDetails(int orderId, float amount, String clientName,
