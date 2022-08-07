@@ -6,16 +6,18 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import java.sql.Date;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Invoice {
+public class InvoiceDetail {
     @Id
     private int OrderId;
     private String clientName;
-    private String billing_interval;
-    private float amount;
+    private int billing_interval;
+    private String charges;
     private String status;
+    private Date billing_date;
 }

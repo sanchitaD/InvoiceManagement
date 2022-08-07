@@ -43,9 +43,15 @@ public class InvoiceController {
         return "Deleted Successfully!!";
     }
 
-    @GetMapping("/generateInvoice/{id}")
-    public String generateInvoiceByOrderId(@PathVariable("id") int orderId){
+    @GetMapping("/computeInvoice/{id}")
+    public String computeInvoiceByOrderId(@PathVariable("id") int orderId){
         log.info("Inside generateInvoiceByOrderId of InvoiceController.");
-        return invoiceManagementService.invoiceGeneration(orderId);
+        return invoiceManagementService.computeInvoice(orderId);
     }
+
+//    @GetMapping("/generateDailyInvoice/{id}")
+//    public String generateDailyInvoiceByOrderId(@PathVariable("id") int orderId){
+//        log.info("Inside generateInvoiceByOrderId of InvoiceController.");
+//        return invoiceManagementService.invoiceGenerationDaily(orderId);
+//    }
 }

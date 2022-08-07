@@ -2,7 +2,7 @@ package com.sanchitacodes.InvoiceManagement.service;
 
 import com.sanchitacodes.ClientManagement.entity.ClientDetail;
 import com.sanchitacodes.ClientManagement.service.ClientManagementServiceImpl;
-import com.sanchitacodes.InvoiceManagement.entity.Invoice;
+import com.sanchitacodes.InvoiceManagement.entity.InvoiceDetail;
 import com.sanchitacodes.InvoiceManagement.entity.TransactionDetail;
 import com.sanchitacodes.InvoiceManagement.repository.InvoiceManagementRepository;
 import com.sanchitacodes.InvoiceManagement.repository.TransactionManagementRepository;
@@ -14,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+
+import static com.sanchitacodes.InvoiceManagement.utility.InvoiceManagementConstants.*;
 
 @Slf4j
 @Service
@@ -45,42 +47,14 @@ public class InvoiceManagementService {
         transactionManagementRepository.deleteById(id);
     }
 
-    public String invoiceGeneration(int orderId) {
+    public String computeInvoice(int orderId) {
         log.info("Inside invoiceGeneration of InvoiceManagementService, generating invoice!");
         Optional<TransactionDetail> transactionDetail = transactionManagementRepository.findById(orderId);
         ClientDetail clientDetail = getClientDetail(transactionDetail.get().getClient());
         saveInvoiceDetails(orderId, transactionDetail.get().getAmount(), transactionDetail.get().getClient(),
-                clientDetail.getFees(), clientDetail.getBilling_interval(), transactionDetail.get().getStatus());
-
-        return "Invoice Generated!!";
-    }
-
-    private void saveInvoiceDetails(int orderId, float amount, String clientName,
-                                    float fees, String billing_interval, String tx_status) {
-
-        log.info("Inside saveInvoiceDetails of InvoiceManagementService, saving invoice in DB!");
-        final String APPROVED = "approved";
-
-        //TODO: create constant
-        final String REFUND = "refund";                 //TODO: create constant
-        final String DECLINED = "declined";             //TODO: create constant
-        InvoiceManagementUtil invoiceManagementUtil = new InvoiceManagementUtil();
-        Invoice invoice = new Invoice();
-        if(tx_status.equals(APPROVED)) {
-            invoice.setAmount(invoiceManagementUtil.calculateCharges(fees, amount));
-        }
-        if(tx_status.equals(REFUND)){
-            invoice.setAmount(invoiceManagementUtil.calculateCharges(fees, amount));
-        }
-        if(tx_status.equals(DECLINED)){
-            //TODO: Refund cannot be done for a declined transaction.
-            invoice.setAmount(invoiceManagementUtil.calculateCharges(fees, amount));
-        }
-        invoice.setBilling_interval(billing_interval);
-        invoice.setClientName(clientName);
-        invoice.setOrderId(orderId);
-        invoice.setStatus(tx_status);
-        invoiceManagementRepository.save(invoice);
+                clientDetail.getFees(), clientDetail.getBilling_interval(), transactionDetail.get().getStatus(),
+                transactionDetail.get().getCurrency());
+        return "Invoice Computed!!";
     }
 
     private ClientDetail getClientDetail(String clientName) {
@@ -88,5 +62,35 @@ public class InvoiceManagementService {
         ClientManagementServiceImpl clientManagementServiceImpl = new ClientManagementServiceImpl();
         ClientDetail clientDetail = clientManagementServiceImpl.fetchClientDetailByClientName(clientName);
         return clientDetail;
+    }
+
+    private void saveInvoiceDetails(int orderId, float amount, String clientName,
+                                    float fees, String billing_interval, String tx_status,
+                                    String currency) {
+
+        log.info("Inside saveInvoiceDetails of InvoiceManagementService, saving invoice in DB!");
+
+        InvoiceManagementUtil invoiceManagementUtil = new InvoiceManagementUtil();
+        InvoiceDetail invoice = new InvoiceDetail();
+        if(tx_status.equals(APPROVED)) {
+            invoice.setCharges(invoiceManagementUtil.calculateCharges(currency, fees, amount));
+        }
+        if(tx_status.equals(REFUND)){
+            invoice.setCharges(invoiceManagementUtil.calculateCharges(currency, fees, amount));
+        }
+        if(tx_status.equals(DECLINED)){
+            //TODO: Refund cannot be done for a declined transaction.
+            invoice.setCharges(currency + " " + 0);
+        }
+        if(billing_interval.equals(DAILY)){
+            invoice.setBilling_interval(1);
+        }
+        if(billing_interval.equals(MONTHLY)){
+            invoice.setBilling_interval(2);
+        }
+        invoice.setClientName(clientName);
+        invoice.setOrderId(orderId);
+        invoice.setStatus(tx_status);
+        invoiceManagementRepository.save(invoice);
     }
 }
