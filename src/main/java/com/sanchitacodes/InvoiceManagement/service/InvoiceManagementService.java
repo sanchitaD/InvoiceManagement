@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.sanchitacodes.InvoiceManagement.utility.InvoiceManagementConstants.*;
-
 @Slf4j
 @Service
 @Transactional
@@ -52,7 +51,7 @@ public class InvoiceManagementService {
         ClientDetail clientDetail = getClientDetail(transactionDetail.get().getClient());
         saveInvoiceDetails(orderId, transactionDetail.get().getAmount(), transactionDetail.get().getClient(),
                 clientDetail.getFees(), clientDetail.getBilling_interval(), transactionDetail.get().getStatus(),
-                transactionDetail.get().getCurrency());
+                transactionDetail.get().getCurrency(), clientDetail.getEmail());
         return "Invoice Computed!!";
     }
 
@@ -64,7 +63,7 @@ public class InvoiceManagementService {
 
     private void saveInvoiceDetails(int orderId, float amount, String clientName,
                                     float fees, String billing_interval, String tx_status,
-                                    String currency) {
+                                    String currency, String email) {
 
         log.info("Inside saveInvoiceDetails of InvoiceManagementService, saving invoice in DB!");
 
@@ -77,7 +76,7 @@ public class InvoiceManagementService {
             invoice.setCharges(invoiceManagementUtil.calculateCharges(currency, fees, amount));
         }
         if(tx_status.equals(DECLINED)){
-            //TODO: Refund cannot be done for a declined transaction.
+            //Refund cannot be done for a declined transaction.
             invoice.setCharges(currency + " " + 0);
         }
         if(billing_interval.equals(DAILY)){

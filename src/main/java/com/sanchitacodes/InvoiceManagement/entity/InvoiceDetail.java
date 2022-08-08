@@ -20,4 +20,5 @@ public class InvoiceDetail {
     private String charges;
     private String status;
     private Date billing_date;
+    private String email;
 }
